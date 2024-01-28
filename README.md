@@ -25,3 +25,9 @@ WARNING: Running pip as the 'root' user can result in broken permissions and con
 
 This should allow all users to use the packages without having to install them multiple times.
 This is a problem with very large packages like `torch` and `spark`.
+
+Then install the current package into your local user directory, so changes that you make are local to your own users.
+
+```bash
+pip install -e .
+```
