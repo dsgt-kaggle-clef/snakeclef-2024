@@ -4,7 +4,7 @@ set -ex
 # option for user site packages
 if [[ "$1" == "--user" ]]; then
     echo "installing to user site packages"
-    site_packages=$(python -c 'import site; print(site.getusersitepackages()[0])')
+    site_packages=$(python -c 'import site; print(site.getusersitepackages())')
 else
     site_packages=$(python -c 'import site; print(site.getsitepackages()[0])')
 fi
