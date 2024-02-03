@@ -1,21 +1,36 @@
 #!/bin/bash
 
-# This script downloads and extracts the SnakeCLEF2023 dataset.
+# This script downloads and extracts a dataset from GCS.
+# The dataset URL and destination directory are configurable.
 
 set -e # Exit immediately if a command exits with a non-zero status.
 
-DATASET_URL="gs://dsgt-clef-snakeclef-2024/raw/SnakeCLEF2023-train-small_size.tar.gz"
-DESTINATION_DIR="/mnt/data"
-DATASET_NAME="SnakeCLEF2023-train-small_size.tar.gz"
+# Default values
+DEFAULT_DATASET_URL="gs://dsgt-clef-snakeclef-2024/raw/SnakeCLEF2023-train-small_size.tar.gz"
+DEFAULT_DESTINATION_DIR="/mnt/data"
+
+# Check if custom arguments are provided
+if [ "$#" -ge 2 ]; then
+    DATASET_URL="$1"
+    DESTINATION_DIR="$2"
+else
+    DATASET_URL="$DEFAULT_DATASET_URL"
+    DESTINATION_DIR="$DEFAULT_DESTINATION_DIR"
+fi
+
+DATASET_NAME=$(basename "$DATASET_URL")
 DESTINATION_PATH="$DESTINATION_DIR/$DATASET_NAME"
+
+echo "Using dataset URL: $DATASET_URL"
+echo "Downloading dataset to: $DESTINATION_DIR"
 
 # Prepare the destination directory
 sudo mount "$DESTINATION_DIR" || true # Proceed even if mount fails, assuming it's already mounted
 sudo chmod -R 777 "$DESTINATION_DIR"
 echo "Permissions set for $DESTINATION_DIR."
 
-# Download the dataset (if not already downloaded)
-echo "Downloading dataset to $DESTINATION_DIR..."
+# Download the dataset
+echo "Downloading dataset..."
 gcloud storage cp "$DATASET_URL" "$DESTINATION_DIR" || {
     echo "Failed to download the dataset."
     exit 1
