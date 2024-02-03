@@ -3,6 +3,15 @@
 # This script downloads and extracts a dataset from GCS.
 # The dataset URL and destination directory are configurable.
 
+# Usage:
+# ./download_extract_dataset.sh [DATASET_URL] [DESTINATION_DIR]
+#
+# Example:
+# ./download_extract_dataset.sh gs://dsgt-clef-snakeclef-2024/raw/SnakeCLEF2023-train-small_size.tar.gz /mnt/data
+#
+# This will download the dataset from the specified URL and extract it to the specified destination directory.
+# If no arguments are provided, default values are used for both the dataset URL and destination directory.
+
 set -e # Exit immediately if a command exits with a non-zero status.
 
 # Default values
