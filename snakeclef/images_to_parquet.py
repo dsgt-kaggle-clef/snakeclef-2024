@@ -105,10 +105,11 @@ def create_metadata_df(raw_root: str):
 
 
 def main(base_dir_path, raw_root_path):
-    base_dir = Path(base_dir_path)
+    """Main function to orchestrate the DataFrame creation and joining"""
+    base_dir = Path(base_dir_path)  # Convert base_dir_path to a Path object here
     raw_root = raw_root_path
 
-    # Create dataframes
+    # Create DataFrames
     image_df = create_image_df(base_dir=base_dir)
     metadata_df = create_metadata_df(raw_root=raw_root)
 
@@ -121,17 +122,6 @@ def main(base_dir_path, raw_root_path):
 
 
 if __name__ == "__main__":
-    # Get SparkSession
-    spark = get_spark()
-
-    # Base directory using pathlib
-    curr_dir = Path(os.getcwd())
-    base_dir = curr_dir.parents[1]
-    base_dir = base_dir / "data" / "SnakeCLEF2023-small_size"
-
-    # Root directory
-    raw_root = "gs://dsgt-clef-snakeclef-2024/raw/"
-
     parser = argparse.ArgumentParser(
         description="Process images and metadata for SnakeCLEF2023."
     )
@@ -144,4 +134,13 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    # Adjust the default base_dir and raw_root if not provided
+    if not args.base_dir:
+        curr_dir = Path(os.getcwd())
+        args.base_dir = str(curr_dir.parents[1] / "data" / "SnakeCLEF2023-small_size")
+
+    if not args.raw_root:
+        args.raw_root = "gs://dsgt-clef-snakeclef-2024/raw/"
+
+    # Call the main function with the processed arguments
     main(base_dir_path=args.base_dir, raw_root_path=args.raw_root)
