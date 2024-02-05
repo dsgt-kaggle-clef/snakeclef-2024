@@ -9,7 +9,7 @@ from snakeclef.utils import get_spark
 
 """
 Before running this script, make sure you have downloaded and extracted the dataset into the data folder.
-Use the bash file `download_extract_dataset.sh`
+Use the bash file `download_extract_dataset.sh` in the scripts folder.
 """
 
 
@@ -99,16 +99,28 @@ def parse_args():
         help="Base directory path for image data",
     )
     parser.add_argument(
-        "--raw_root",
+        "--raw-root",
         type=str,
         default="gs://dsgt-clef-snakeclef-2024/raw/",
         help="Root directory path for metadata",
     )
     parser.add_argument(
-        "--gcs_output_path",
+        "--gcs-output-path",
         type=str,
         default="gs://dsgt-clef-snakeclef-2024/data/parquet_files/image_data",
         help="GCS path for output Parquet files",
+    )
+    parser.add_argument(
+        "--dataset-name",
+        type=str,
+        default="SnakeCLEF2023-small_size",
+        help="Dataset name downloaded from tar file",
+    )
+    parser.add_argument(
+        "--meta-dataset-name",
+        type=str,
+        default="SnakeCLEF2023-TrainMetadata-iNat",
+        help="Train Metadata CSV file",
     )
 
     return parser.parse_args()
@@ -122,20 +134,20 @@ def main():
     spark = get_spark()
 
     # Declare dataset names
-    dataset_name = "SnakeCLEF2023-small_size"
-    meta_dataset_name = "SnakeCLEF2023-TrainMetadata-iNat"
+    dataset_name = args.dataset_name
+    meta_dataset_name = args.meta_dataset_name
 
     # Convert base_dir_path to a Path object here
     base_dir = Path(args.base_dir)
-    base_dir = base_dir.parents[0] / "data" / dataset_name
+    base_dir = base_dir / "data" / dataset_name
     raw_root = args.raw_root
 
     # Create image dataframe
-    image_df = create_image_df(spark, base_dir=base_dir)
+    image_df = create_image_df(spark=spark, base_dir=base_dir)
 
     # Create metadata dataframe
     metadata_df = create_metadata_df(
-        spark,
+        spark=spark,
         raw_root=raw_root,
         meta_dataset_name=meta_dataset_name,
         dataset_name=dataset_name,
