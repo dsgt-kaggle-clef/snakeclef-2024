@@ -1,3 +1,4 @@
+import argparse
 import os
 from pathlib import Path
 
@@ -6,17 +7,6 @@ from pyspark.sql import functions as F
 from pyspark.sql.functions import lit, regexp_extract, regexp_replace
 
 from snakeclef.utils import get_spark
-
-# Get SparkSession
-spark = get_spark()
-
-# Base directory using pathlib
-curr_dir = Path(os.getcwd())
-base_dir = curr_dir.parents[1]
-base_dir = base_dir / "data" / "SnakeCLEF2023-small_size"
-
-# Root directory
-raw_root = "gs://dsgt-clef-snakeclef-2024/raw/"
 
 
 # Image dataframe
@@ -114,7 +104,10 @@ def create_metadata_df(raw_root: str):
     return joined_meta_df
 
 
-def main():
+def main(base_dir_path, raw_root_path):
+    base_dir = Path(base_dir_path)
+    raw_root = raw_root_path
+
     # Create dataframes
     image_df = create_image_df(base_dir=base_dir)
     metadata_df = create_metadata_df(raw_root=raw_root)
@@ -125,3 +118,30 @@ def main():
     # Now, if you wish to drop the renamed columns from joined_meta_df:
     final_df = joined_df.drop("meta_path", "meta_binomial_name")
     return final_df
+
+
+if __name__ == "__main__":
+    # Get SparkSession
+    spark = get_spark()
+
+    # Base directory using pathlib
+    curr_dir = Path(os.getcwd())
+    base_dir = curr_dir.parents[1]
+    base_dir = base_dir / "data" / "SnakeCLEF2023-small_size"
+
+    # Root directory
+    raw_root = "gs://dsgt-clef-snakeclef-2024/raw/"
+
+    parser = argparse.ArgumentParser(
+        description="Process images and metadata for SnakeCLEF2023."
+    )
+    parser.add_argument(
+        "--base_dir", type=str, required=True, help="Base directory path for image data"
+    )
+    parser.add_argument(
+        "--raw_root", type=str, required=True, help="Root directory path for metadata"
+    )
+
+    args = parser.parse_args()
+
+    main(base_dir_path=args.base_dir, raw_root_path=args.raw_root)
