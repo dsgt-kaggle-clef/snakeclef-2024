@@ -123,6 +123,7 @@ def main():
 
     # Convert base_dir_path to a Path object here
     base_dir = Path(args.base_dir)
+    base_dir = base_dir.parents[0] / "data" / "SnakeCLEF2023-small_size"
     raw_root = args.raw_root
     meta_dataset_name = "SnakeCLEF2023-TrainMetadata-iNat"
 
@@ -137,10 +138,7 @@ def main():
     )
 
     # Perform an inner join on the 'image_path' column
-    joined_df = image_df.join(metadata_df, "image_path", "inner")
-
-    # Now, if you wish to drop the renamed columns from joined_meta_df:
-    final_df = joined_df.drop("meta_path", "meta_binomial_name")
+    final_df = image_df.join(metadata_df, "image_path", "inner")
 
     # Write the DataFrame to GCS in Parquet format
     final_df.write.mode("overwrite").parquet(args.gcs_output_path)
