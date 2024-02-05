@@ -58,7 +58,7 @@ def create_image_df(spark, base_dir: Path):
     return image_final_df
 
 
-def create_metadata_df(spark, raw_root: str, meta_dataset_name: str):
+def create_metadata_df(spark, raw_root: str, meta_dataset_name: str, dataset_name: str):
     # Read the iNaturalist metadata CSV file
     meta_df = spark.read.csv(
         f"{raw_root}/{meta_dataset_name}.csv",
@@ -73,7 +73,7 @@ def create_metadata_df(spark, raw_root: str, meta_dataset_name: str):
     meta_df = meta_df.dropDuplicates(["image_path"])
 
     # Assuming you want to process image paths in a similar manner
-    train_root = Path("/mnt/data/SnakeCLEF2023-small_size")
+    train_root = Path(f"/mnt/data/{dataset_name}")
     paths = sorted([p.relative_to(train_root) for p in train_root.glob("**/*.jpg")])
 
     # Create a DataFrame from the paths
@@ -122,8 +122,9 @@ def main():
     spark = get_spark()
 
     # Convert base_dir_path to a Path object here
+    dataset_name = "SnakeCLEF2023-small_size"
     base_dir = Path(args.base_dir)
-    base_dir = base_dir.parents[0] / "data" / "SnakeCLEF2023-small_size"
+    base_dir = base_dir.parents[0] / "data" / dataset_name
     raw_root = args.raw_root
     meta_dataset_name = "SnakeCLEF2023-TrainMetadata-iNat"
 
@@ -135,6 +136,7 @@ def main():
         spark,
         raw_root=raw_root,
         meta_dataset_name=meta_dataset_name,
+        dataset_name=dataset_name,
     )
 
     # Perform an inner join on the 'image_path' column
