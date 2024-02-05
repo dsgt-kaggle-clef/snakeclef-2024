@@ -104,8 +104,8 @@ def create_metadata_df(raw_root: str):
     return joined_meta_df
 
 
-def main(base_dir_path, raw_root_path):
-    """Main function to orchestrate the DataFrame creation and joining"""
+def main(base_dir_path, raw_root_path, gcs_output_path):
+    """Main function that processes data and writes the result to GCS"""
     base_dir = Path(base_dir_path)  # Convert base_dir_path to a Path object here
     raw_root = raw_root_path
 
@@ -118,7 +118,9 @@ def main(base_dir_path, raw_root_path):
 
     # Now, if you wish to drop the renamed columns from joined_meta_df:
     final_df = joined_df.drop("meta_path", "meta_binomial_name")
-    return final_df
+
+    # Write the DataFrame to GCS in Parquet format
+    final_df.write.mode("overwrite").parquet(gcs_output_path)
 
 
 if __name__ == "__main__":
@@ -131,6 +133,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "--raw_root", type=str, required=True, help="Root directory path for metadata"
     )
+    parser.add_argument(
+        "--gcs_output_path",
+        type=str,
+        required=True,
+        help="GCS path for output Parquet files",
+    )
 
     args = parser.parse_args()
 
@@ -142,5 +150,14 @@ if __name__ == "__main__":
     if not args.raw_root:
         args.raw_root = "gs://dsgt-clef-snakeclef-2024/raw/"
 
+    if not args.gcs_output_path:
+        args.gcs_output_path = (
+            "gs://dsgt-clef-snakeclef-2024/data/parquet_files/image_data"
+        )
+
     # Call the main function with the processed arguments
-    main(base_dir_path=args.base_dir, raw_root_path=args.raw_root)
+    main(
+        base_dir_path=args.base_dir,
+        raw_root_path=args.raw_root,
+        gcs_output_path=args.gcs_output_path,
+    )
