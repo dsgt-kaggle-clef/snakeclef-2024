@@ -95,7 +95,7 @@ def parse_args():
     parser.add_argument(
         "--base-dir",
         type=str,
-        default=str(Path(os.getcwd())),
+        default=str(Path(".").resolve()),
         help="Base directory path for image data",
     )
     parser.add_argument(
@@ -121,12 +121,14 @@ def main():
     # Initialize Spark
     spark = get_spark()
 
-    # Convert base_dir_path to a Path object here
+    # Declare dataset names
     dataset_name = "SnakeCLEF2023-small_size"
+    meta_dataset_name = "SnakeCLEF2023-TrainMetadata-iNat"
+
+    # Convert base_dir_path to a Path object here
     base_dir = Path(args.base_dir)
     base_dir = base_dir.parents[0] / "data" / dataset_name
     raw_root = args.raw_root
-    meta_dataset_name = "SnakeCLEF2023-TrainMetadata-iNat"
 
     # Create image dataframe
     image_df = create_image_df(spark, base_dir=base_dir)
