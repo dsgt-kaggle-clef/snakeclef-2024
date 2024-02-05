@@ -128,15 +128,12 @@ if __name__ == "__main__":
         description="Process images and metadata for SnakeCLEF2023."
     )
     parser.add_argument(
-        "--base_dir", type=str, required=True, help="Base directory path for image data"
+        "--base_dir", type=str, help="Base directory path for image data"
     )
-    parser.add_argument(
-        "--raw_root", type=str, required=True, help="Root directory path for metadata"
-    )
+    parser.add_argument("--raw_root", type=str, help="Root directory path for metadata")
     parser.add_argument(
         "--gcs_output_path",
         type=str,
-        required=True,
         help="GCS path for output Parquet files",
     )
 
@@ -145,7 +142,7 @@ if __name__ == "__main__":
     # Adjust the default base_dir and raw_root if not provided
     if not args.base_dir:
         curr_dir = Path(os.getcwd())
-        args.base_dir = str(curr_dir.parents[1] / "data" / "SnakeCLEF2023-small_size")
+        args.base_dir = str(curr_dir.parents[0] / "data" / "SnakeCLEF2023-small_size")
 
     if not args.raw_root:
         args.raw_root = "gs://dsgt-clef-snakeclef-2024/raw/"
@@ -154,6 +151,9 @@ if __name__ == "__main__":
         args.gcs_output_path = (
             "gs://dsgt-clef-snakeclef-2024/data/parquet_files/image_data"
         )
+
+    # Initialize SparkSession
+    spark = get_spark()
 
     # Call the main function with the processed arguments
     main(
