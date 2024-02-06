@@ -2,7 +2,6 @@ import argparse
 import os
 from pathlib import Path
 
-from pyspark.sql import Row
 from pyspark.sql.functions import element_at, regexp_replace, split
 
 from snakeclef.utils import get_spark
@@ -13,9 +12,9 @@ Use the bash file `download_extract_dataset.sh` in the scripts folder.
 """
 
 
-# Image dataframe
-def create_image_df(spark, base_dir: Path):
-    # Load all files from the base directory as binary data
+def create_dataframe(spark, base_dir: Path, raw_root_path: str, meta_dataset_name: str):
+    """Converts images into binary data and joins with a Metadata DataFrame"""
+    # Load all image files from the base directory as binary data
     image_df = (
         spark.read.format("binaryFile")
         .option("pathGlobFilter", "*.jpg")
@@ -55,13 +54,10 @@ def create_image_df(spark, base_dir: Path):
     image_final_df = image_final_df.withColumn(
         "image_path", regexp_replace("path", f"^/{base_dir.parts[-1]}/", "")
     )
-    return image_final_df
 
-
-def create_metadata_df(spark, raw_root: str, meta_dataset_name: str, dataset_name: str):
     # Read the iNaturalist metadata CSV file
     meta_df = spark.read.csv(
-        f"{raw_root}/{meta_dataset_name}.csv",
+        f"{raw_root_path}/{meta_dataset_name}.csv",
         header=True,
         inferSchema=True,
     )
@@ -72,19 +68,13 @@ def create_metadata_df(spark, raw_root: str, meta_dataset_name: str, dataset_nam
     # Drop duplicate entries based on 'image_path' before the join
     meta_df = meta_df.dropDuplicates(["image_path"])
 
-    # Assuming you want to process image paths in a similar manner
-    train_root = Path(f"/mnt/data/{dataset_name}")
-    paths = sorted([p.relative_to(train_root) for p in train_root.glob("**/*.jpg")])
+    # Drop 'binomial_name' column since before joining with image_final_df
+    meta_final_df = meta_df.drop("binomial_name")
 
-    # Create a DataFrame from the paths
-    path_df = spark.createDataFrame([Row(path=p.as_posix()) for p in paths])
+    # Perform an inner join on the 'image_path' column
+    final_df = image_final_df.join(meta_final_df, "image_path", "inner")
 
-    # Let's join the metadata DataFrame with the paths DataFrame
-    joined_meta_df = meta_df.join(path_df, meta_df.image_path == path_df.path, "inner")
-
-    # Dropping columns to avoid confusion
-    joined_meta_df = joined_meta_df.drop("path", "binomial_name")
-    return joined_meta_df
+    return final_df
 
 
 def parse_args():
@@ -93,19 +83,19 @@ def parse_args():
         description="Process images and metadata for SnakeCLEF2023."
     )
     parser.add_argument(
-        "--base-dir",
+        "--image-root-path",
         type=str,
         default=str(Path(".").resolve()),
         help="Base directory path for image data",
     )
     parser.add_argument(
-        "--raw-root",
+        "--raw-root-path",
         type=str,
         default="gs://dsgt-clef-snakeclef-2024/raw/",
         help="Root directory path for metadata",
     )
     parser.add_argument(
-        "--gcs-output-path",
+        "--output-path",
         type=str,
         default="gs://dsgt-clef-snakeclef-2024/data/parquet_files/image_data",
         help="GCS path for output Parquet files",
@@ -133,31 +123,19 @@ def main():
     # Initialize Spark
     spark = get_spark()
 
-    # Declare dataset names
-    dataset_name = args.dataset_name
-    meta_dataset_name = args.meta_dataset_name
-
-    # Convert base_dir_path to a Path object here
-    base_dir = Path(args.base_dir)
-    base_dir = base_dir / "data" / dataset_name
-    raw_root = args.raw_root
+    # Convert image-root-path to a Path object here
+    base_dir = Path(args.image_root_path) / "data" / args.dataset_name
 
     # Create image dataframe
-    image_df = create_image_df(spark=spark, base_dir=base_dir)
-
-    # Create metadata dataframe
-    metadata_df = create_metadata_df(
+    final_df = create_dataframe(
         spark=spark,
-        raw_root=raw_root,
-        meta_dataset_name=meta_dataset_name,
-        dataset_name=dataset_name,
+        base_dir=base_dir,
+        raw_root_path=args.raw_root_path,
+        meta_dataset_name=args.meta_dataset_name,
     )
 
-    # Perform an inner join on the 'image_path' column
-    final_df = image_df.join(metadata_df, "image_path", "inner")
-
     # Write the DataFrame to GCS in Parquet format
-    final_df.write.mode("overwrite").parquet(args.gcs_output_path)
+    final_df.write.mode("overwrite").parquet(args.output_path)
 
 
 if __name__ == "__main__":
