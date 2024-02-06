@@ -80,7 +80,7 @@ def create_dataframe(spark, base_dir: Path, raw_root_path: str, meta_dataset_nam
 def parse_args():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
-        description="Process images and metadata for SnakeCLEF2023."
+        description="Process images and metadata for a dataset stored on GCS."
     )
     parser.add_argument(
         "--image-root-path",
