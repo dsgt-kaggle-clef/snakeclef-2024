@@ -97,7 +97,7 @@ def parse_args():
     parser.add_argument(
         "--output-path",
         type=str,
-        default="gs://dsgt-clef-snakeclef-2024/data/parquet_files/image_data",
+        default="gs://dsgt-clef-snakeclef-2024/data/parquet_files/SnakeCLEF2023-small_size",
         help="GCS path for output Parquet files",
     )
     parser.add_argument(
