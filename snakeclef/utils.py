@@ -8,16 +8,18 @@ os.environ["PYSPARK_PYTHON"] = sys.executable
 os.environ["PYSPARK_DRIVER_PYTHON"] = sys.executable
 
 
-def get_spark(cores=4, memory="8g", local_dir="/mnt/data/tmp"):
-    """Get a Spark session for a single driver."""
-    spark_session_builder = (
+def get_spark(cores=4, memory="8g", local_dir="/mnt/data/tmp", **kwargs):
+    """Get a spark session for a single driver."""
+    builder = (
         SparkSession.builder.config("spark.driver.memory", memory)
         .config("spark.driver.cores", cores)
-        .config("spark.local.dir", local_dir)
         .config("spark.sql.execution.arrow.pyspark.enabled", "true")
         .config("spark.driver.maxResultSize", "4g")
+        .config("spark.local.dir", local_dir)
     )
-    return spark_session_builder.getOrCreate()
+    for k, v in kwargs.items():
+        builder = builder.config(k, v)
+    return builder.getOrCreate()
 
 
 @contextmanager
