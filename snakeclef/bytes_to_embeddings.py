@@ -8,7 +8,7 @@ from PIL import Image
 import torch
 import numpy as np
 
-from snakeclef.utils import get_spark
+from utils import get_spark
 
 def make_predict_fn():
     """Return PredictBatchFunction"""
@@ -73,7 +73,9 @@ def main():
     args = parse_args()
 
     # Initialize Spark
-    spark = get_spark()
+    spark = get_spark(gpu_resources=True, memory='15g', **{
+        "spark.sql.parquet.enableVectorizedReader": False, 
+    })
 
     output_folder = f'DINOv2-embeddings-{args.image_size}_size/'
     output_path = args.gcs_parquet_path+output_folder
