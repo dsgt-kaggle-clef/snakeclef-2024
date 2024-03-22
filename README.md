@@ -72,7 +72,7 @@ python snakeclef/images_to_parquet.py [OPTIONS]
 
 - `--raw-root-path`: Root directory path for metadata. Default is `gs://dsgt-clef-snakeclef-2024/raw/`.
 
-- `--output-path`: GCS path for output Parquet files. Default is `gs://dsgt-clef-snakeclef-2024/data/parquet_files/image_data`.
+- `--output-path`: GCS path for output Parquet files. Default is `gs://dsgt-clef-snakeclef-2024/data/parquet_files/SnakeCLEF2023-small_size`.
 
 - `--dataset-name`: Dataset name downloaded from the tar file. Default is `SnakeCLEF2023-small_size`.
 
