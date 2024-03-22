@@ -70,6 +70,16 @@ def parse_args():
         default=16,
         help="Batch size for processing images",
     )
+    parser.add_argument(
+        "--memory",
+        type=str,
+        default="12g",
+    )
+    parser.add_argument(
+        "--cores",
+        type=int,
+        default=4,
+    )
 
     return parser.parse_args()
 
