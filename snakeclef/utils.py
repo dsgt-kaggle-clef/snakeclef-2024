@@ -8,7 +8,9 @@ os.environ["PYSPARK_PYTHON"] = sys.executable
 os.environ["PYSPARK_DRIVER_PYTHON"] = sys.executable
 
 
-def get_spark(cores=4, memory="8g", local_dir="/mnt/data/tmp", gpu_resources=False, **kwargs):
+def get_spark(
+    cores=4, memory="8g", local_dir="/mnt/data/tmp", gpu_resources=False, **kwargs
+):
     """Get a spark session for a single driver."""
     builder = (
         SparkSession.builder.config("spark.driver.memory", memory)
@@ -19,11 +21,15 @@ def get_spark(cores=4, memory="8g", local_dir="/mnt/data/tmp", gpu_resources=Fal
     )
 
     if gpu_resources:
-        builder = builder.config("spark.rapids.memory.pinnedPool.size", "2G")\
-                         .config("spark.executor.resource.gpu.amount", "1")\
-                         .config("spark.task.resource.gpu.amount", "0.1")\
-                         .config("spark.executor.resource.gpu.discoveryScript", "getGpusResources.sh")\
-                         .config("spark.rapids.sql.concurrentGpuTasks", "1")  # Adjust based on your GPU's capability
+        builder = (
+            builder.config("spark.rapids.memory.pinnedPool.size", "2G")
+            .config("spark.executor.resource.gpu.amount", "1")
+            .config("spark.task.resource.gpu.amount", "0.1")
+            .config(
+                "spark.executor.resource.gpu.discoveryScript", "getGpusResources.sh"
+            )
+            .config("spark.rapids.sql.concurrentGpuTasks", "1")
+        )  # Adjust based on your GPU's capability
 
     for k, v in kwargs.items():
         builder = builder.config(k, v)
