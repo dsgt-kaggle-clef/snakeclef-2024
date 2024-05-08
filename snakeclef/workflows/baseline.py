@@ -19,7 +19,7 @@ class ProcessBase(luigi.Task):
     output_path = luigi.Parameter()
     should_subset = luigi.BoolParameter(default=False)
     sample_col = luigi.Parameter(default="observation_id")
-    num_partitions = luigi.OptionalIntParameter(default=500)
+    num_partitions = luigi.OptionalIntParameter(default=32)
     sample_id = luigi.OptionalIntParameter(default=None)
     num_sample_id = luigi.OptionalIntParameter(default=10)
 
