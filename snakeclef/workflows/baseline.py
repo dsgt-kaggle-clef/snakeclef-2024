@@ -145,20 +145,18 @@ class Workflow(luigi.Task):
         subset_list = [True, False]
         train_model = False
         sample_col = "observation_id"
-        dino_sql_statement = (
-            "SELECT image_name, species_id, dino_embedding FROM __THIS__"
-        )
-        dct_sql_statement = "SELECT image_name, species_id, dct_embedding FROM __THIS__"
-        cls_sql_statement = "SELECT image_name, species_id, cls_embedding FROM __THIS__"
+        dino_sql_statement = "SELECT path, observation_id, dino_embedding FROM __THIS__"
+        dct_sql_statement = "SELECT path, observation_id, dct_embedding FROM __THIS__"
+        cls_sql_statement = "SELECT path, observation_id, cls_embedding FROM __THIS__"
 
         # test workflow parameters
         if self.process_test_data:
             subset_list = [False]  # Skip subset for test data
             train_model = False  # Skip model training
-            sample_col = "image_name"
-            dino_sql_statement = "SELECT image_name, dino_embedding FROM __THIS__"
-            dct_sql_statement = "SELECT image_name, dct_embedding FROM __THIS__"
-            cls_sql_statement = "SELECT image_name, cls_embedding FROM __THIS__"
+            sample_col = "path"
+            dino_sql_statement = "SELECT path, dino_embedding FROM __THIS__"
+            dct_sql_statement = "SELECT path, dct_embedding FROM __THIS__"
+            cls_sql_statement = "SELECT path, cls_embedding FROM __THIS__"
 
         # Run jobs with subset and full-size data
         for subset in subset_list:
