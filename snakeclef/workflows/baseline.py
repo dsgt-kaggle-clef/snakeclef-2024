@@ -166,18 +166,16 @@ class Workflow(luigi.Task):
                 final_output_path = self.output_path.replace(
                     self.output_path.split("/")[-1], subset_path
                 )
-            yield [
-                ProcessDino(
-                    input_path=self.input_path,
-                    output_path=f"{final_output_path}/dino",
-                    should_subset=subset,
-                    sample_id=i,
-                    num_sample_id=10,
-                    sample_col=sample_col,
-                    sql_statement=dino_sql_statement,
-                )
-                for i in range(10)
-            ]
+            yield ProcessDino(
+                input_path=self.input_path,
+                output_path=f"{final_output_path}/dino",
+                should_subset=subset,
+                # sample_id=i,
+                # num_sample_id=10,
+                sample_col=sample_col,
+                sql_statement=dino_sql_statement,
+            )
+
             yield ProcessDCT(
                 input_path=f"{final_output_path}/dino/data",
                 output_path=f"{final_output_path}/dino_dct",
@@ -239,7 +237,7 @@ def parse_args():
     parser.add_argument(
         "--output-name-path",
         type=str,
-        default="data/process/training_v1",
+        default="data/process/training_small_v1",
         help="GCS path for output Parquet files",
     )
     parser.add_argument(
