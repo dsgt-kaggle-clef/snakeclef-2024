@@ -143,7 +143,7 @@ class Workflow(luigi.Task):
     def run(self):
         # training workflow parameters
         subset_list = [True, False]
-        train_model = False
+        train_model = True
         sample_col = "observation_id"
         dino_sql_statement = "SELECT path, observation_id, dino_embedding FROM __THIS__"
         dct_sql_statement = "SELECT path, observation_id, dct_embedding FROM __THIS__"
@@ -193,7 +193,7 @@ class Workflow(luigi.Task):
 
         # Train classifier outside of the subset loop
         if train_model:
-            for limit_species in [5, None]:
+            for limit_species in [None]:
                 # use the Dino-DCT dataset for training the classifier
                 data_path = "dino_dct/data"
                 input_path = f"{self.output_path}/{data_path}"

@@ -49,9 +49,18 @@ class PetastormDataModule(pl.LightningDataModule):
             .orderBy(F.col("n").desc(), F.col(self.sample_col))
             .withColumn("index", F.monotonically_increasing_id())
         ).drop("n")
+        # print("Grouped DF")
+        # grouped_df.show(n=5, truncate=50)
+        # print(grouped_df.count())
 
         # Use broadcast join to optimize smaller DataFrame joining
         filtered_df = df.join(F.broadcast(grouped_df), self.sample_col, "inner")
+        # print("input_path:", self.input_path)
+        # print("sample_col:", self.sample_col)
+        # print("species_image_count:", self.species_image_count)
+        # print("Filtered DF")
+        # filtered_df.show(n=5, truncate=50)
+        # print(filtered_df.count())
 
         # Optionally limit the number of species
         if self.limit_species is not None:

@@ -19,7 +19,7 @@ class TrainDCTEmbeddingClassifier(luigi.Task):
     feature_col = luigi.Parameter()
     default_root_dir = luigi.Parameter()
     limit_species = luigi.OptionalIntParameter(default=None)
-    species_image_count = luigi.IntParameter(default=100)
+    species_image_count = luigi.IntParameter(default=1)
     batch_size = luigi.IntParameter(default=32)
     num_partitions = luigi.IntParameter(default=32)
 
@@ -46,6 +46,7 @@ class TrainDCTEmbeddingClassifier(luigi.Task):
                 len(data_module.train_data.select("features").first()["features"])
             )
             num_classes = int(data_module.train_data.select("label").distinct().count())
+            print("num_classes:", num_classes)
 
             # model module
             model = LinearClassifier(
