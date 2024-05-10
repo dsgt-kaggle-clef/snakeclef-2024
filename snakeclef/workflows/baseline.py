@@ -18,7 +18,7 @@ class ProcessBase(luigi.Task):
     input_path = luigi.Parameter()
     output_path = luigi.Parameter()
     should_subset = luigi.BoolParameter(default=False)
-    sample_col = luigi.Parameter(default="observation_id")
+    sample_col = luigi.Parameter(default="class_id")
     num_partitions = luigi.OptionalIntParameter(default=32)
     sample_id = luigi.OptionalIntParameter(default=None)
     num_sample_id = luigi.OptionalIntParameter(default=10)
@@ -143,11 +143,11 @@ class Workflow(luigi.Task):
     def run(self):
         # training workflow parameters
         subset_list = [True, False]
-        train_model = True
-        sample_col = "observation_id"
-        dino_sql_statement = "SELECT path, observation_id, dino_embedding FROM __THIS__"
-        dct_sql_statement = "SELECT path, observation_id, dct_embedding FROM __THIS__"
-        cls_sql_statement = "SELECT path, observation_id, cls_embedding FROM __THIS__"
+        train_model = False
+        sample_col = "class_id"
+        dino_sql_statement = "SELECT path, class_id, dino_embedding FROM __THIS__"
+        dct_sql_statement = "SELECT path, class_id, dct_embedding FROM __THIS__"
+        cls_sql_statement = "SELECT path, class_id, cls_embedding FROM __THIS__"
 
         # test workflow parameters
         if self.process_test_data:
@@ -237,7 +237,7 @@ def parse_args():
     parser.add_argument(
         "--output-name-path",
         type=str,
-        default="data/process/training_small_v1",
+        default="data/process/training_small_v2",
         help="GCS path for output Parquet files",
     )
     parser.add_argument(
@@ -271,9 +271,9 @@ if __name__ == "__main__":
     use_cls_token = args.use_cls_token
 
     # update workflow parameters for processing test data
-    if process_test_data:
-        input_path = f"{args.gcs_root_path}/data/parquet_files/PlantCLEF2024_test"
-        output_path = f"{args.gcs_root_path}/data/process/test_v1"
+    # if process_test_data:
+    #     input_path = f"{args.gcs_root_path}/data/parquet_files/PlantCLEF2024_test"
+    #     output_path = f"{args.gcs_root_path}/data/process/test_v1"
 
     luigi.build(
         [

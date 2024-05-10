@@ -31,7 +31,7 @@ class PetastormDataModule(pl.LightningDataModule):
         self.batch_size = batch_size
         self.num_partitions = num_partitions
         self.workers_count = workers_count
-        self.sample_col = "observation_id"
+        self.sample_col = "class_id"
 
     def _prepare_species_data(self):
         """
@@ -40,6 +40,8 @@ class PetastormDataModule(pl.LightningDataModule):
         """
         # Read the Parquet file into a DataFrame
         df = self.spark.read.parquet(self.input_path).cache()
+        print("_prepare_species_data df")
+        df.show(n=5, truncate=50)
 
         # Aggregate and filter species based on image count
         grouped_df = (
@@ -77,10 +79,18 @@ class PetastormDataModule(pl.LightningDataModule):
             filtered_df = filtered_df.drop("index").join(
                 F.broadcast(limited_grouped_df), self.sample_col, "inner"
             )
+        # return filtered_df
+
+        print("_prepare_species_data filtered_df")
+        filtered_df.show(n=5, truncate=50)
+
         return filtered_df
 
     def _prepare_dataframe(self, df, partitions=32):
         """Prepare the DataFrame for training by ensuring correct types and repartitioning"""
+        print("_prepare_dataframe df")
+        df.show(n=5, truncate=50)
+        print("self.feature_col", self.feature_col)
         return (
             df.withColumnRenamed(self.feature_col, "features")
             .withColumnRenamed("index", "label")
