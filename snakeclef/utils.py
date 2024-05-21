@@ -14,7 +14,7 @@ def get_spark(
     memory=os.environ.get("PYSPARK_DRIVER_MEMORY", "8g"),
     executor_memory=os.environ.get("PYSPARK_EXECUTOR_MEMORY", "1g"),
     local_dir="/mnt/data/tmp",
-    app_name="plantclef",
+    app_name="snakeclef",
     **kwargs,
 ):
     """Get a spark session for a single driver."""

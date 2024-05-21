@@ -143,7 +143,7 @@ class Workflow(luigi.Task):
     def run(self):
         # training workflow parameters
         subset_list = [True, False]
-        train_model = False
+        train_model = True
         sample_col = "class_id"
         dino_sql_statement = "SELECT path, class_id, dino_embedding FROM __THIS__"
         dct_sql_statement = "SELECT path, class_id, dct_embedding FROM __THIS__"
