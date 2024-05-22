@@ -45,7 +45,9 @@ class TrainDCTEmbeddingClassifier(luigi.Task):
             num_features = int(
                 len(data_module.train_data.select("features").first()["features"])
             )
-            num_classes = int(data_module.train_data.select("label").distinct().count())
+            num_classes = (
+                1749  # int(data_module.train_data.select("label").distinct().count())
+            )
             print("num_classes:", num_classes)
 
             # model module
