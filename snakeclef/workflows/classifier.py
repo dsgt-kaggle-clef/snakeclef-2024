@@ -6,9 +6,9 @@ import luigi.contrib.gcs
 import pytorch_lightning as pl
 import torch
 import wandb
-from plantclef.baseline.data import PetastormDataModule
-from plantclef.baseline.model import LinearClassifier
-from plantclef.utils import spark_resource
+from snakeclef.baseline.data import PetastormDataModule
+from snakeclef.baseline.model import LinearClassifier
+from snakeclef.utils import spark_resource
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from pytorch_lightning.callbacks.model_checkpoint import ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
@@ -19,7 +19,7 @@ class TrainDCTEmbeddingClassifier(luigi.Task):
     feature_col = luigi.Parameter()
     default_root_dir = luigi.Parameter()
     limit_species = luigi.OptionalIntParameter(default=None)
-    species_image_count = luigi.IntParameter(default=100)
+    species_image_count = luigi.IntParameter(default=1)
     batch_size = luigi.IntParameter(default=32)
     num_partitions = luigi.IntParameter(default=32)
 
@@ -45,7 +45,10 @@ class TrainDCTEmbeddingClassifier(luigi.Task):
             num_features = int(
                 len(data_module.train_data.select("features").first()["features"])
             )
-            num_classes = int(data_module.train_data.select("label").distinct().count())
+            num_classes = (
+                1749  # int(data_module.train_data.select("label").distinct().count())
+            )
+            print("num_classes:", num_classes)
 
             # model module
             model = LinearClassifier(
@@ -55,7 +58,7 @@ class TrainDCTEmbeddingClassifier(luigi.Task):
 
             # initialise the wandb logger and name your wandb project
             wandb_logger = WandbLogger(
-                project="plantclef-2024",
+                project="snakeclef-2024",
                 name=Path(self.default_root_dir).name,
                 save_dir=self.default_root_dir,
             )
