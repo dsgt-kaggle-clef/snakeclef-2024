@@ -34,7 +34,7 @@ def images_root(tmp_path):
 def metadata(tmp_path, images_root):
     res = []
     for i, img in enumerate(images_root.glob("*.jpg")):
-        res.append({"image_path": img.name, "observation_id": i})
+        res.append({"filename": img.name, "observation_id": i})
     df = pd.DataFrame(res)
     df.to_csv(tmp_path / "metadata.csv", index=False)
     return tmp_path / "metadata.csv"
@@ -76,7 +76,7 @@ def test_model_checkpoint(model_checkpoint):
 def test_make_submission(model_checkpoint, metadata, images_root, tmp_path):
     output_csv_path = tmp_path / "submission.csv"
     make_submission(metadata, model_checkpoint, output_csv_path, images_root)
-    submission_df = pd.read_csv(output_csv_pathgit)
+    submission_df = pd.read_csv(output_csv_path)
     assert len(submission_df) == 10
     assert set(submission_df.columns) == {"observation_id", "class_id"}
     assert submission_df["class_id"].isin(range(10)).all()
