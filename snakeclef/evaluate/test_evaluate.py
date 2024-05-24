@@ -11,9 +11,9 @@ from .model import LinearClassifier
 
 class TestingInferenceDataModel(InferenceDataModel):
     def train_dataloader(self):
-        for batch in self.dataloader:
+        for batch in self.predict_dataloader():
             # add a label to the batch with classes from 0 to 9
-            batch["label"] = torch.randint(0, 10, (len(batch),))
+            batch["label"] = torch.randint(0, 10, (batch["features"].shape[0],))
             yield batch
 
 
@@ -64,7 +64,7 @@ def test_inference_datamodel(images_root, metadata):
     assert len(model.dataloader) == 2
     for batch in model.predict_dataloader():
         assert set(batch.keys()) == {"features"}
-        assert batch["features"].shape == torch.Size([batch_size, 3, 100, 100])
+        assert batch["features"].shape == torch.Size([batch_size, 768])
 
 
 def test_model_checkpoint(model_checkpoint):

@@ -2,9 +2,27 @@ from pathlib import Path
 
 import pandas as pd
 import pytorch_lightning as pl
+import torch
 from PIL import Image
 from torch.utils.data import DataLoader, Dataset
 from torchvision.transforms import v2
+from transformers import AutoImageProcessor, AutoModel
+
+
+class TransformDino(v2.Transform):
+    def __init__(self, model_name="facebook/dinov2-base"):
+        super().__init__()
+        self.processor = AutoImageProcessor.from_pretrained(model_name)
+        self.model = AutoModel.from_pretrained(model_name)
+
+    def forward(self, batch):
+        model_inputs = self.processor(images=batch["features"], return_tensors="pt")
+        with torch.no_grad():
+            outputs = self.model(**model_inputs)
+            last_hidden_states = outputs.last_hidden_state
+        # extract the cls token
+        batch["features"] = last_hidden_states[:, 0]
+        return batch
 
 
 class ImageDataset(Dataset):
@@ -45,5 +63,7 @@ class InferenceDataModel(pl.LightningDataModule):
         )
 
     def predict_dataloader(self):
+        transform = v2.Compose([TransformDino("facebook/dinov2-base")])
         for batch in self.dataloader:
+            batch = transform(batch)
             yield batch
