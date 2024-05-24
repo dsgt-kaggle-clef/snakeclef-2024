@@ -1,3 +1,5 @@
+import zipfile
+
 import pandas as pd
 import torch
 from pytorch_lightning import Trainer
@@ -30,17 +32,10 @@ def make_submission(
 
 
 if __name__ == "__main__":
-    import zipfile
-
     with zipfile.ZipFile("/tmp/data/private_testset.zip", "r") as zip_ref:
         zip_ref.extractall("/tmp/data")
 
-    MODEL_PATH = "pytorch_model.bin"
-    MODEL_NAME = "tf_efficientnet_b1.ap_in1k"
-
+    MODEL_PATH = "last.ckpt"
     metadata_file_path = "./SnakeCLEF2024-TestMetadata.csv"
     test_metadata = pd.read_csv(metadata_file_path)
-
-    make_submission(
-        test_metadata=test_metadata, model_path=MODEL_PATH, model_name=MODEL_NAME
-    )
+    make_submission(test_metadata=test_metadata, model_path=MODEL_PATH)
