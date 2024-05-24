@@ -39,7 +39,7 @@ class ImageDataset(Dataset):
         image_path = Path(self.images_root_path) / row.image_path
         img = Image.open(image_path).convert("RGB")
         img = v2.ToTensor()(img)
-        return {"features": img}
+        return {"features": img, "observation_id": row.observation_id}
 
 
 class InferenceDataModel(pl.LightningDataModule):

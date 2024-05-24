@@ -7,6 +7,7 @@ from pytorch_lightning import Trainer
 
 from .data import ImageDataset, InferenceDataModel
 from .model import LinearClassifier
+from .submission import make_submission
 
 
 class TestingInferenceDataModel(InferenceDataModel):
@@ -32,8 +33,8 @@ def images_root(tmp_path):
 @pytest.fixture
 def metadata(tmp_path, images_root):
     res = []
-    for img in images_root.glob("*.jpg"):
-        res.append({"image_path": img.name})
+    for i, img in enumerate(images_root.glob("*.jpg")):
+        res.append({"image_path": img.name, "observation_id": i})
     df = pd.DataFrame(res)
     df.to_csv(tmp_path / "metadata.csv", index=False)
     return tmp_path / "metadata.csv"
@@ -63,10 +64,19 @@ def test_inference_datamodel(images_root, metadata):
     model.setup()
     assert len(model.dataloader) == 2
     for batch in model.predict_dataloader():
-        assert set(batch.keys()) == {"features"}
+        assert set(batch.keys()) == {"features", "observation_id"}
         assert batch["features"].shape == torch.Size([batch_size, 768])
 
 
 def test_model_checkpoint(model_checkpoint):
     model = LinearClassifier.load_from_checkpoint(model_checkpoint)
     assert model
+
+
+def test_make_submission(model_checkpoint, metadata, images_root, tmp_path):
+    output_csv_path = tmp_path / "submission.csv"
+    make_submission(metadata, model_checkpoint, output_csv_path, images_root)
+    submission_df = pd.read_csv(output_csv_pathgit)
+    assert len(submission_df) == 10
+    assert set(submission_df.columns) == {"observation_id", "class_id"}
+    assert submission_df["class_id"].isin(range(10)).all()
