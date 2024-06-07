@@ -29,3 +29,4 @@ efficientnet_pytorch
 jupyterlab
 black
 pre-commit
+pytest
